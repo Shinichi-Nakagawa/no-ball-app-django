@@ -64,6 +64,10 @@ WSGI_APPLICATION = 'noball.wsgi.application'
 
 DATABASES = {
     'default': {
+        'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+        'NAME': os.path.join(BASE_DIR, 'noball.db'),                      # Or path to database file if using sqlite3.
+    },
+    'mlb': {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': 'sean_lahman',                      # Or path to database file if using sqlite3.
         'USER': 'app',

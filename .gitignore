@@ -55,3 +55,6 @@ target/
 
 # IntelliJ IDEA
 .idea/
+
+# Django DB
+noball/noball.db
