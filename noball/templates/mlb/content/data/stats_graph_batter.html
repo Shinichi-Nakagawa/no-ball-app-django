@@ -1,0 +1,63 @@
+{% comment %}
+成績
+Graphデータ（打者）
+{% endcomment %}
+<script>
+
+{% comment %}
+打率,出塁率,長打率
+{% endcomment %}
+Morris.Line({
+  element: 'morris-avg',
+  data: [
+      {% for row in data.avg_list %}
+    	{ year: '{{ row.year }}', avg: {{ row.avg }}, obp: {{ row.obp }}, slg: {{ row.slg }}},
+      {% endfor %}
+  ],
+  xkey: 'year',
+  ykeys: ['avg', 'obp', 'slg'],
+  labels: ['AVG', 'OBP', 'SLG'],
+  smooth: false,
+  hideHover: 'auto',
+  ymax:1.0,
+  ymin:0
+});
+
+{% comment %}
+片岡式(HR+SB)
+{% endcomment %}
+Morris.Bar ({
+  element: 'morris-kataoka',
+  data: [
+      {% for row in data.hr_list %}
+    	{ year: '{{ row.year }}', hr: {{ row.hr }}, sb: {{ row.sb }}},
+      {% endfor %}
+  ],
+  xkey: 'year',
+  ykeys: ['hr', 'sb'],
+  labels: ['HR', 'SB'],
+  stacked: true,
+  hideHover: 'auto',
+  ymax:100,
+  ymin:0
+});
+
+{% comment %}
+打点,得点
+{% endcomment %}
+Morris.Bar ({
+  element: 'morris-rbi',
+  data: [
+      {% for row in data.rbi_list %}
+    	{ year: '{{ row.year }}', rbi: {{ row.rbi }}, r: {{ row.r }}},
+      {% endfor %}
+  ],
+  xkey: 'year',
+  ykeys: ['rbi', 'r'],
+  labels: ['RBI', 'R'],
+  stacked: true,
+  hideHover: 'auto',
+  ymax:240,
+  ymin:0
+});
+</script>

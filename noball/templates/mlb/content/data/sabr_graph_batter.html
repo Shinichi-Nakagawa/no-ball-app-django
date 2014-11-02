@@ -1,0 +1,64 @@
+{% comment %}
+セイバーメトリクス
+Graphデータ（打者）
+{% endcomment %}
+<script>
+
+{% comment %}
+WAR, RC27
+{% endcomment %}
+Morris.Line({
+  element: 'morris-rc',
+  data: [
+      {% for row in data.rc_list %}
+    	{ year: '{{ row.year }}', rc: {{ row.rc }}},
+      {% endfor %}
+  ],
+  xkey: 'year',
+  ykeys: ['rc'],
+  labels: ['RC27'],
+  smooth: false,
+  hideHover: 'auto',
+  ymax:15,
+  ymin:0
+});
+
+{% comment %}
+BABIP, AVG
+{% endcomment %}
+Morris.Line({
+  element: 'morris-babip',
+  data: [
+      {% for row in data.babip_list %}
+    	{ year: '{{ row.year }}', babip: {{ row.babip }}, avg: {{ row.avg }}},
+      {% endfor %}
+  ],
+  xkey: 'year',
+  ykeys: ['babip', 'avg'],
+  labels: ['BABIP', 'AVG'],
+  smooth: false,
+  hideHover: 'auto',
+  ymax:0.5,
+  ymin:0
+});
+
+{% comment %}
+Adam Dunn
+{% endcomment %}
+Morris.Line({
+  element: 'morris-dunn',
+  data: [
+      {% for row in data.dunn_list %}
+    	{ year: '{{ row.year }}', dunn: {{ row.dunn }}},
+      {% endfor %}
+  ],
+  xkey: 'year',
+  ykeys: ['dunn'],
+  labels: ['Adam Dunn'],
+  smooth: false,
+  hideHover: 'auto',
+  ymax:100,
+  ymin:0,
+  yLabelFormat: function (y) { return y.toString() + '%'; }
+});
+</script>

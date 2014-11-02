@@ -1,0 +1,63 @@
+{% extends "mlb/base/base.html" %}
+{% comment %}
+ホーム画面＆選手基本情報
+{% endcomment %}
+{% comment %}タイトル（固定）{% endcomment %}
+{% block title %}{{ APPLICATION_NAME }}{% endblock %}
+{% comment %}検索Action名 {% endcomment %}
+{% block search-action %}/{{ SUB_DOMAIN }}/{{ action }}{% endblock %}
+{% comment %}ナビゲーターのStatus（固定）{% endcomment %}
+{% block navbar-home %}{% endblock %}
+{% comment %}パンくず（動的）{% endcomment %}
+{% block breadcrumb %}
+{% endblock %}
+{% comment %}ページ名（静的）{% endcomment %}
+{% block page_title %}
+{% endblock %}
+{% comment %}サービス名{% endcomment %}
+{% block player_name %}{{ APPLICATION_NAME }} - Readable Baseball Library{%  endblock %}
+{% comment %}コンテンツ（動的）{% endcomment %}
+{% block content %}
+    {% comment %}これから作る{% endcomment %}
+    {% if result %}
+        <h3>Player Search meny results</h3>
+    <div class="table-responsive">
+    <table class="table table-bordered table-hover tablesorter">
+    <thead>
+        <tr>
+            <th>Player Name <i class="fa fa-sort"></i></th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for row in values %}
+        <tr>
+            <td>
+                <a href="/{{ SUB_DOMAIN }}/{{ action }}/?{{ QUERY_KEY }}={{ row.name }}">
+                {{ row.name }}
+                </a>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+    </table>
+    </div>
+    {% else %}
+        <h3>Sorry, No players found...</h3>
+        <form role="search" method="post" action="/{{ SUB_DOMAIN }}/{{ search_action }}/">
+            <label>Search Player</label>
+            {% include "mlb/base/search_form.html" %}
+        </form>
+    {% endif %}
+{% endblock %}
+{% comment %}
+コンテンツデータ（動的）
+
+今のところナシ、将来はアリ（多分）
+{% endcomment %}
+{% block data_content %}
+    {% comment %}
+    Table Sort Lib
+    {% endcomment %}
+    <script src="{{ STATIC_URL }}js/tablesorter/jquery.tablesorter.js"></script>
+    <script src="{{ STATIC_URL }}js/tablesorter/tables.js"></script>
+{% endblock %}

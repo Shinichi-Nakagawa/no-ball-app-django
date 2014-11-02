@@ -1,0 +1,41 @@
+{% extends "mlb/base/base.html" %}
+{% comment %}
+ホーム画面＆選手基本情報
+{% endcomment %}
+{% comment %}タイトル（固定）{% endcomment %}
+{% block title %}{{ APPLICATION_NAME }} - PyCon JP 2014{% endblock %}
+{% comment %}検索Action名 {% endcomment %}
+{% block search-action %}search{% endblock %}
+{% comment %}ナビゲーターのStatus（固定）{% endcomment %}
+{% block navbar-home %}class="active"{% endblock %}
+{% comment %}パンくず（動的）{% endcomment %}
+{% block breadcrumb %}
+{% endblock %}
+{% comment %}ページ名（静的）{% endcomment %}
+{% block page_title %}{% endblock %}
+{% comment %}サービス名{% endcomment %}
+{% block player_name %}{%  endblock %}
+{% comment %}コンテンツ（動的）{% endcomment %}
+{% block content %}
+    {% comment %}これから作る{% endcomment %}
+    <div class="container">
+      <div  class="row">
+        <form role="search" method="post" action="/{{ SUB_DOMAIN }}/search/">
+            {% include "mlb/base/search_form.html" %}
+        </form>
+      </div>
+      <div class="row">
+
+
+      </div>
+
+    </div>
+
+{% endblock %}
+{% comment %}
+コンテンツデータ（動的）
+
+今のところナシ、将来はアリ（多分）
+{% endcomment %}
+{% block data_content %}
+{% endblock %}

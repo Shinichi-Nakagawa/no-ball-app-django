@@ -1,0 +1,17 @@
+{% csrf_token %}
+<div class="form-group input-group">
+    <input type="text" name="year" class="form-control"  placeholder="input a year" value="{{ year }}">
+    <select name="league" class="form-control" >
+        {% for l in leagues %}
+            {% ifequal l league %}
+                <option value='{{ l }}' selected>{{ l }}</option>
+            {% endifequal %}
+            {% ifnotequal l league %}
+                <option value='{{ l }}'>{{ l }}</option>
+            {% endifnotequal %}
+        {% endfor %}
+    </select>
+    <span class="input-group-btn">
+        <button class="btn btn-default" type="submit"><i class="fa fa-search"></i></button>
+    </span>
+</div>
