@@ -8,7 +8,7 @@ import locale
 from datetime import datetime
 
 from service.const import POSITION_PITCHER, POSITION_BATTER
-from service.stats import Stats
+from service.stats import Stats as BaseballStats
 from noball.settings import APPLICATION_NAME
 
 
@@ -61,20 +61,20 @@ class Stats(object):
         datasets = []
         for t in teams:
             d = {
-                'team': t.teamID,
+                'team': t.teamid,
                 'name': t.name,
-                'div': t.divID,
-                'rank': t.Rank,
-                'g': t.G,
-                'w': t.W,
-                'l': t.L,
-                'r': t.R,
-                'er': t.ER,
-                'win_p': Stats.calc_winning_percentage(t.W, t.G),
-                'pyt_p': Stats.calc_pythagorean_expectation(t.R, t.RA)
+                'div': t.divid,
+                'rank': t.rank,
+                'g': t.g,
+                'w': t.w,
+                'l': t.l,
+                'r': t.r,
+                'er': t.er,
+                'win_p': Stats.calc_winning_percentage(t.w, t.g),
+                'pyt_p': Stats.calc_pythagorean_expectation(t.r, t.ra)
             }
-            d['pyt_p_w'] = round(t.G * d['pyt_p'], 0)
-            d['pyt_p_l'] = t.G - d['pyt_p_w']
+            d['pyt_p_w'] = round(t.g * d['pyt_p'], 0)
+            d['pyt_p_l'] = t.g - d['pyt_p_w']
             datasets.append(d)
         return datasets
 
@@ -86,7 +86,6 @@ class Stats(object):
         :param salary: Player salary model
         :return: (dict)sabar stats data
         """
-        # TODO 書き直す
         # SABR Data(batter)
         _datasets = {
             'rc_list': [],
@@ -94,51 +93,46 @@ class Stats(object):
             'dunn_list': []
         }
 
-        for items in stats:
-            # 複数Recordあり得るので足し込む
-            year = items[0]
-            hr, bb, so, pa = 0, 0, 0, 0
-            h, ab, sf, rc = 0, 0, 0, 0
-            hbp, cs, gidp, sh, sb, ibb = 0, 0, 0, 0, 0, 0
-            single, _2b, _3b = 0, 0, 0
-            for batting in items[1]:
-                hr = hr + batting.HR
-                bb = bb + batting.BB
-                so = so + batting.SO
-                h = h + batting.H
-                ab = ab + batting.AB
-                sf = sf + batting.SF
-                hbp = hbp + batting.HBP
-                cs = cs + batting.CS
-                gidp = gidp + batting.GIDP
-                sh = sh + batting.SH
-                sb = sb + batting.SB
-                ibb = ibb + batting.IBB
-                _2b = _2b + batting._2B
-                _3b = _3b + batting._3B
-
-            pa = Stats.pa(ab, bb, hbp, sf, sh)
-            single = Stats.single(h, hr, _2b, _3b)
-            rc = Stats.rc(h, bb, hbp, cs, gidp, sf, sh, sb, so, ab, ibb, single, _2b, _3b, hr)
+        for batting in stats:
+            year = batting.yearid
+            pa = BaseballStats.pa(batting.ab, batting.bb, batting.hbp, batting.sf, batting.sh)
+            single = BaseballStats.single(batting.h, batting.hr, batting.number_2b, batting.number_3b)
+            rc = BaseballStats.rc(
+                batting.h,
+                batting.bb,
+                batting.hbp,
+                batting.cs,
+                batting.gidp,
+                batting.sf,
+                batting.sh,
+                batting.sb,
+                batting.so,
+                batting.ab,
+                batting.ibb,
+                single,
+                batting.number_2b,
+                batting.number_3b,
+                batting.hr
+            )
 
             _datasets['rc_list'].append(
                 {
                     'year': year,
-                    'rc': Stats.rc27(rc, ab, h, sh, sf, cs, gidp)
+                    'rc': BaseballStats.rc27(rc, batting.ab, batting.h, batting.sh, batting.sf, batting.cs, batting.gidp)
                 }
             )
 
             _datasets['dunn_list'].append(
                 {
                     'year': year,
-                    'dunn': Stats.adam_dunn_batter(hr, bb, so, pa)
+                    'dunn': BaseballStats.adam_dunn_batter(batting.hr, batting.bb, batting.so, pa)
                 }
             )
             _datasets['babip_list'].append(
                 {
                     'year': year,
-                    'avg': Stats.avg(h, ab),
-                    'babip': Stats.babip(h, hr, ab, so, sf)
+                    'avg': BaseballStats.avg(batting.h, batting.ab),
+                    'babip': BaseballStats.babip(batting.h, batting.hr, batting.ab, batting.so, batting.sf)
                 }
             )
         return _datasets
@@ -151,7 +145,6 @@ class Stats(object):
         :param salary: Player salary model
         :return: (dict)sabar stats data
         """
-        # TODO 書き直す
         # SABR Data(pitcher)
         _datasets = {
             'whip_list': [],
@@ -159,40 +152,29 @@ class Stats(object):
             'dunn_list': []
         }
 
-        for items in stats:
-            # 複数Recordあり得るので足し込む
-            year = items[0]
-            bb, h, hr, so, hbp, bfp = 0, 0, 0, 0, 0, 0
-            ip_outs = 0
-            for pitching in items[1]:
-                ip_outs = ip_outs + pitching.IPouts
-                bb = bb + pitching.BB
-                h = h + pitching.H
-                hr = hr + pitching.HR
-                so = so + pitching.SO
-                hbp = hbp + pitching.HBP
-                bfp = bfp + pitching.BFP
+        for pitching in stats:
+            year = pitching.yearid
 
-            ip = Stats.ip(ip_outs)
+            ip = BaseballStats.ip(pitching.ipouts)
 
             _datasets['whip_list'].append(
                 {
                     'year': year,
-                    'whip': Stats.whip(bb, h, ip)
+                    'whip': BaseballStats.whip(pitching.bb, pitching.h, ip)
                 }
             )
             _datasets['hr9_list'].append(
                 {
                     'year': year,
-                    'hr9': Stats.hr9(hr, ip),
-                    'bb9': Stats.bb9(bb, ip),
-                    'so9': Stats.so9(so, ip)
+                    'hr9': BaseballStats.hr9(pitching.hr, ip),
+                    'bb9': BaseballStats.bb9(pitching.bb, ip),
+                    'so9': BaseballStats.so9(pitching.so, ip)
                 }
             )
             _datasets['dunn_list'].append(
                 {
                     'year': year,
-                    'dunn': Stats.adam_dunn_pitcher(hr, bb, hbp, so, bfp)
+                    'dunn': BaseballStats.adam_dunn_pitcher(pitching.hr, pitching.bb, pitching.hbp, pitching.so, pitching.bfp)
                 }
             )
         return _datasets
@@ -205,27 +187,26 @@ class Stats(object):
         :param salary: Player salary model
         :return: pitcher profile(dict)
         """
-        # TODO 書き直す
         # statsから必要な値を修得
         w, l, so, er, ipo, year, teams = 0, 0, 0, 0, 0, 0, []
         if len(stats) > 0:
-            year = stats[0][0]
-            for s in stats[0][1]:
-                w = w + s.W
-                l = l + s.L
-                so = so + s.SO
-                er = er + s.ER
-                ipo = ipo + s.IPouts
-                teams.append(s.teamID)
+            pitching = stats[0]
+            year = pitching.yearid
+            w = pitching.w
+            l = pitching.l
+            so = pitching.so
+            er = pitching.er
+            ipo = pitching.ipouts
+            # teams.append(pitching.teamid)
 
         # ipを計算
-        ip = Stats.ip(ipo)
+        ip = BaseballStats.ip(ipo)
 
         _prof = self._get_base_profile(player, year, teams, salary)
         _prof['position'] = POSITION_PITCHER.upper()
         _prof['win'] = w
         _prof['lose'] = l
-        _prof['era'] = Stats.era(er, ip)
+        _prof['era'] = BaseballStats.era(er, ip)
         _prof['so'] = so
         return _prof
 
@@ -237,21 +218,20 @@ class Stats(object):
         :param salary: Player salary model
         :return: batter profile(dict)
         """
-        # TODO 書き直す
         # statsから必要な値を修得
         hr, rbi, h, ab, year, teams = 0, 0, 0, 0, 0, []
         if len(stats) > 0:
-            year = stats[0][0]
-            for s in stats[0][1]:
-                h = h + s.H
-                ab = ab + s.AB
-                hr = hr + s.HR
-                rbi = rbi + s.RBI
-                teams.append(s.teamID)
+            batter = stats[0]
+            year = batter.yearid
+            h = batter.h
+            ab = batter.ab
+            hr = batter.hr
+            rbi = rbi + batter.rbi
+            # teams.append(batter.teamid)
 
         _prof = self._get_base_profile(player, year, teams, salary)
         _prof['position'] = POSITION_BATTER.upper()
-        _prof['avg'] = Stats.avg(h, ab)
+        _prof['avg'] = BaseballStats.avg(h, ab)
         _prof['hr'] = hr
         _prof['rbi'] = rbi
         return _prof
@@ -268,14 +248,14 @@ class Stats(object):
         return {
             'year': year,
             'team': ','.join(teams),
-            'age': Stats.calc_age(player.birthYear),
-            'birthday': '%d/%d/%d' % (player.birthYear, player.birthMonth, player.birthDay),
+            'age': Stats.calc_age(player.birthyear),
+            'birthday': '%d/%d/%d' % (player.birthyear, player.birthmonth, player.birthday),
             'salary': Stats._calc_salary(salary),
-            'country': player.birthCountry,
-            'city': player.birthCity,
+            'country': player.birthcountry,
+            'city': player.birthcity,
             'bats': player.bats,
             'throws': player.throws,
-            'display_name': ' '.join([player.nameFirst, player.nameLast])
+            'display_name': ' '.join([player.namefirst, player.namelast])
 
         }
 
@@ -288,7 +268,7 @@ class Stats(object):
         """
         sal = 0
         if len(salary) > 0:
-            for s in salary[0][1]:
+            for s in salary:
                 sal = sal + s.salary
         return Stats._get_salary(sal)
 
@@ -339,4 +319,3 @@ class Stats(object):
         r_power = r ** Stats.PYTHAGORIAN_POWER
         ra_power = ra ** Stats.PYTHAGORIAN_POWER
         return round(r_power / (r_power + ra_power), 3)
-

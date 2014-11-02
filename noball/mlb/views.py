@@ -8,10 +8,10 @@ from django.http import HttpResponseRedirect
 
 from django.views.generic import TemplateView
 from noball.settings import VIEW_ENCODE
-from service.const import LEAGUES, POSITION_BATTER, POSITION_PITCHER
+from service.const import CURRENT_SEASON_YEAR, LEAGUES, POSITION_BATTER, POSITION_PITCHER, LEAGUE_AL
 from mlb.form import SearchForm, PytagorasForm
 from mlb.service.stats import Stats as StatsService
-from mlb.models import Teams, Salaries
+from mlb.models import Teams, Salariestotal
 from mlb.models import Master as Player
 from mlb.models import Battingtotal
 from mlb.models import Pitchingtotal
@@ -19,7 +19,15 @@ from mlb.models import Pitchingtotal
 
 class BaseView(TemplateView):
 
+    # データベースを指定
+    DATABASE_READ_FOR = 'mlb'
+
     def get_context_data(self, **kwargs):
+        '''
+        ページ情報を返す
+        :param kwargs:
+        :return:
+        '''
         # Serviceのインスタンス
         self.service = StatsService(VIEW_ENCODE)
         # 共通処理（野手・投手共通の処理、DB検索など）
@@ -49,11 +57,12 @@ class PlayerView(BaseView):
         context.update(self.service.get_base_context())
         # 検索QUERYを保存
         context['query_name'] = name
-        if Player.objects.filter(nameFirst=first).filter(nameLast=last).count() == 1:
+        if Player.objects.using(self.DATABASE_READ_FOR)\
+                .filter(namefirst=first).filter(namelast=last).count() == 1:
             # 全画面共通のContext(PlayerModelの中身)
             context['player'] = self._get_player(first, last)
             # 成績情報(PlayerStatsModelの中身)
-            context['stats'], context['pos'], context['Salaries'] = self._get_player_stats(context['player'].playerID)
+            context['stats'], context['pos'], context['Salaries'] = self._get_player_stats(context['player'].playerid)
         else:
             context['MENU_ENABLE'] = False
         return context
@@ -64,7 +73,6 @@ class PlayerView(BaseView):
         野手or投手で呼び出し先を変える
         '''
 
-        _content = {}
         if POSITION_BATTER == context['pos']:
             return self._get_batter_content(context['player'], context['stats'], context['Salaries'])
         elif POSITION_PITCHER == context['pos']:
@@ -79,12 +87,15 @@ class PlayerView(BaseView):
             pass
         else:
             # キャッシュに無かったらDBを検索
-            return Player.objects.filter(nameFirst=first).filter(nameLast=last).get()
+            return Player.objects.using(self.DATABASE_READ_FOR)\
+                .filter(namefirst=first).filter(namelast=last).get()
 
     def _get_player_stats(self, playerID):
         # batting, pitching両方のスタッツを取って多い方を出す。
-        count_atbat = Battingtotal.objects.filter(playerID=playerID).count()
-        count_pitch = Pitchingtotal.objects.filter(playerID=playerID).count()
+        count_atbat = Battingtotal.objects.using(self.DATABASE_READ_FOR)\
+            .filter(playerid=playerID).count()
+        count_pitch = Pitchingtotal.objects.using(self.DATABASE_READ_FOR)\
+            .filter(playerid=playerID).count()
 
         # 検索対象のモデルと戻り値
         if count_atbat > count_pitch:
@@ -95,27 +106,16 @@ class PlayerView(BaseView):
             # Pitcher
             model = self._get_model_filter_player_order_by_year_desc(Pitchingtotal, playerID)
             pos = POSITION_PITCHER
-        salary = self._get_model_filter_player_order_by_year_desc(Salaries, playerID)
+        salary = self._get_model_filter_player_order_by_year_desc(Salariestotal, playerID)
 
         return model, pos, salary
 
-    def _get_model_filter_player_order_by_year_desc(self, model, player_id, before=3):
+    def _get_model_filter_player_order_by_year_desc(self, model, player_id, limit=4):
         """
         search model
         """
-        # 年度の降順で最新のレコードを取得、年度ごとにDictに詰めて降順で返す
-        rows = {}
-        if model.objects.filter(playerID=player_id).order_by('-yearID').count() > 0:
-            # 一番最後のシーズンの成績を取得(一行だけ)
-            row = model.objects.filter(playerID=player_id).order_by('-yearID').all()[:1]
-            # 最後のシーズンから過去3年分を取得、年度が一緒のモノはchunkする
-            for m in model.objects.filter(playerID=player_id)\
-                .filter(yearID__range=(row[0].yearID - before, row[0].yearID)).order_by('-yearID').all():
-                if m.yearID not in rows:
-                    rows[m.yearID] = []
-                rows[m.yearID].append(m)
-        # 年度の降順でsortし直す
-        return sorted(rows.items(), key=lambda x: x[0], reverse=True)
+        return model.objects.using(self.DATABASE_READ_FOR)\
+            .filter(playerid=player_id).order_by('-yearid').all()[:limit]
 
 
 class MlbBaseballException(Exception):
@@ -127,7 +127,7 @@ class TopView(BaseView):
 
     def get_context_data(self, **kwargs):
         context = super(TopView, self).get_context_data(**kwargs)
-        # TODO 多分何も出さない
+        # TODO 何も出さない
         return context
 
 
@@ -141,11 +141,23 @@ class HomeView(PlayerView):
         return context
 
     def _get_batter_content(self, player, player_stats, Salaries):
-        # Serviceを呼び出す
+        '''
+        Batter情報取得
+        :param player:
+        :param player_stats:
+        :param Salaries:
+        :return:
+        '''
         return self.service.get_home_value_batter(player, player_stats, Salaries)
 
     def _get_pitcher_content(self, player, player_stats, Salaries):
-        # Serviceを呼び出す
+        '''
+        Pitcher情報取得
+        :param player:
+        :param player_stats:
+        :param Salaries:
+        :return:
+        '''
         return self.service.get_home_value_pitcher(player, player_stats, Salaries)
 
 
@@ -172,13 +184,20 @@ class PythagorasView(BaseView):
 
     def get_context_data(self, **kwargs):
         context = super(PythagorasView, self).get_context_data(**kwargs)
-        # TODO MAX_YEARを差し替え context['year'], context['league'], context['leagues'] = MAX_YEAR, LEAGUE_AL, LEAGUES
-        teams = Teams.objects.filter(yearID=context['year']).filter(lgID=context['league']).order_by('divID', 'Rank')
+        context['year'], context['league'], context['leagues'] = CURRENT_SEASON_YEAR, LEAGUE_AL, LEAGUES
+        teams = Teams.objects.using(self.DATABASE_READ_FOR)\
+            .filter(yearid=context['year']).filter(lgid=context['league']).order_by('divid', 'rank')
         context['dataset'] = self.service.get_pythagoras_dataset(teams)
         return context
 
 
 def _search(request, action):
+    '''
+    検索
+    :param request: Http Request objects
+    :param action: 遷移先ページ
+    :return:
+    '''
     service = StatsService(VIEW_ENCODE)
     form = SearchForm(request.POST)
     if form.is_valid():
@@ -186,9 +205,11 @@ def _search(request, action):
         names = name.lower().split()
         if len(names) == 2:
             # 件数チェック
-            players = Player.objects.filter(nameFirst=names[0].capitalize()).filter(nameLast=names[1].capitalize())
+            players = Player.objects.using(BaseView.DATABASE_READ_FOR)\
+                .filter(namefirst=names[0].capitalize()).filter(namelast=names[1].capitalize())
         elif len(names) == 1:
-            players = Player.objects.filter(nameFirst=names[0])
+            players = Player.objects.using(BaseView.DATABASE_READ_FOR)\
+                .filter(namefirst=names[0])
         else:
             raise MlbBaseballException()
 
@@ -269,7 +290,8 @@ def pythagoras_search(request):
             year = form.cleaned_data['year']
             league = form.cleaned_data['league']
             context['year'], context['league'], context['leagues'] = year, league, LEAGUES
-            teams = Teams.objects.filter(yearID=context['year']).filter(lgID=context['league']).order_by('divID', 'Rank')
+            teams = Teams.objects.using(BaseView.DATABASE_READ_FOR)\
+                .filter(yearid=context['year']).filter(lgid=context['league']).order_by('divid', 'rank')
             context['dataset'] = service.get_pythagoras_dataset(teams)
             context['search_action'] = 'pythagoras_search'
         return render_to_response(
