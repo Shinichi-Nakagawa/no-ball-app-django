@@ -239,7 +239,7 @@ class Stats(object):
     @classmethod
     def adam_dunn_pitcher(cls, hr, bb, hbp, so, bfp):
         """
-        Adam dunn %(batter)
+        Adam dunn %(pitcher)
         :param hr: home run
         :param bb: base on ball
         :param hbp: hit by pitch

@@ -82,12 +82,13 @@ class Stats(object):
             datasets.append(d)
         return datasets
 
-    def get_sabr_value_batter(self, player, stats, salary):
+    def get_sabr_value_batter(self, player, stats, salary, html=True):
         """
         SABR Stats for batter
         :param player: Player master model
         :param stats: Player stats model
         :param salary: Player salary model
+        :param html: HTMLで表示(default:True)
         :return: (dict)sabar stats data
         """
         # SABR Data(batter)
@@ -139,14 +140,42 @@ class Stats(object):
                     'babip': BaseballStats.babip(batting.h, batting.hr, batting.ab, batting.so, batting.sf)
                 }
             )
+        # HTML表示の場合かつ戻り値件数未満の場合は空行を追加
+        if html:
+            cnt_row = self.STATS_LIMIT - len(stats)
+            while cnt_row > 0:
+                year -= 1
+                _datasets['rc_list'].append(
+                    {
+                        'year': year,
+                        'rc': 0.0
+                    }
+                )
+                _datasets['dunn_list'].append(
+                    {
+                        'year': year,
+                        'dunn': 0.0
+                    }
+                )
+                _datasets['babip_list'].append(
+                    {
+                        'year': year,
+                        'avg': 0.0,
+                        'babip': 0.0,
+                    }
+                )
+                cnt_row -= 1
+                if cnt_row == 0:
+                    break
         return _datasets
 
-    def get_sabr_value_pitcher(self, player, stats, salary):
+    def get_sabr_value_pitcher(self, player, stats, salary, html=True):
         """
         SABR Stats for batter
         :param player: Player master model
         :param stats: Player stats model
         :param salary: Player salary model
+        :param html: HTMLで表示(default:True)
         :return: (dict)sabar stats data
         """
         # SABR Data(pitcher)
@@ -156,6 +185,7 @@ class Stats(object):
             'dunn_list': []
         }
 
+        year = None
         for pitching in stats:
             year = pitching.yearid
 
@@ -181,6 +211,34 @@ class Stats(object):
                     'dunn': BaseballStats.adam_dunn_pitcher(pitching.hr, pitching.bb, pitching.hbp, pitching.so, pitching.bfp)
                 }
             )
+        # HTML表示の場合かつ戻り値件数未満の場合は空行を追加
+        if html:
+            cnt_row = self.STATS_LIMIT - len(stats)
+            while cnt_row > 0:
+                year -= 1
+                _datasets['whip_list'].append(
+                    {
+                        'year': year,
+                        'whip': 0.0
+                    }
+                )
+                _datasets['hr9_list'].append(
+                    {
+                        'year': year,
+                        'hr9': 0.0,
+                        'bb9': 0.0,
+                        'so9': 0.0
+                    }
+                )
+                _datasets['dunn_list'].append(
+                    {
+                        'year': year,
+                        'dunn': 0.0
+                    }
+                )
+                cnt_row -= 1
+                if cnt_row == 0:
+                    break
         return _datasets
 
     def get_home_value_pitcher(self, player, stats, salary):
