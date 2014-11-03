@@ -11,6 +11,7 @@ from noball.settings import VIEW_ENCODE
 from service.const import CURRENT_SEASON_YEAR, LEAGUES, POSITION_BATTER, POSITION_PITCHER, LEAGUE_AL
 from mlb.form import SearchForm, PytagorasForm
 from mlb.service.stats import Stats as StatsService
+from mlb.service.sean_lahman import SeanLahmanDB as MlbDB
 
 
 class BaseView(TemplateView):
@@ -79,31 +80,34 @@ class PlayerView(BaseView):
             pass
         else:
             # キャッシュに無かったらDBを検索
-            return StatsService.get_player_by_first_name_last_name(first, last).get()
+            return MlbDB.get_player_by_first_name_last_name(first, last).get()
 
     def _get_player_stats(self, playerID):
         # batting, pitching両方のスタッツを取って多い方を出す。
-        cnt_atbat = StatsService.count_by_player_id(StatsService.batting_total(), playerID)
-        cnt_pitch = StatsService.count_by_player_id(StatsService.pitching_total(), playerID)
+        cnt_atbat = MlbDB.count_by_player_id(MlbDB.batting_total(), playerID)
+        cnt_pitch = MlbDB.count_by_player_id(MlbDB.pitching_total(), playerID)
 
         # 検索対象のモデルと戻り値
         if cnt_atbat > cnt_pitch:
             # Batter
-            model = StatsService.get_model_filter_player_order_by_year_desc(
-                StatsService.batting_total(),
-                playerID
+            model = MlbDB.get_model_filter_player_order_by_year_desc(
+                MlbDB.batting_total(),
+                playerID,
+                StatsService.STATS_LIMIT
             )
             pos = POSITION_BATTER
         else:
             # Pitcher
-            model = StatsService.get_model_filter_player_order_by_year_desc(
-                StatsService.pitching_total(),
-                playerID
+            model = MlbDB.get_model_filter_player_order_by_year_desc(
+                MlbDB.pitching_total(),
+                playerID,
+                StatsService.STATS_LIMIT
             )
             pos = POSITION_PITCHER
-        salary = StatsService.get_model_filter_player_order_by_year_desc(
-            StatsService.salaries_total(),
-            playerID
+        salary = MlbDB.get_model_filter_player_order_by_year_desc(
+            MlbDB.salaries_total(),
+            playerID,
+            StatsService.STATS_LIMIT
         )
 
         return model, pos, salary
@@ -114,7 +118,7 @@ class MlbBaseballException(Exception):
 
 
 class TopView(BaseView):
-    template_name = "%s/top.html" % (StatsService.SUB_DOMAIN)
+    template_name = "%s/top.html" % (StatsService.SUB_DOMAIN, )
 
     def get_context_data(self, **kwargs):
         context = super(TopView, self).get_context_data(**kwargs)
@@ -176,7 +180,7 @@ class PythagorasView(BaseView):
     def get_context_data(self, **kwargs):
         context = super(PythagorasView, self).get_context_data(**kwargs)
         context['year'], context['league'], context['leagues'] = CURRENT_SEASON_YEAR, LEAGUE_AL, LEAGUES
-        teams = StatsService.get_teams_by_yearid_lgid(context['year'], context['league'])
+        teams = MlbDB.get_teams_by_yearid_lgid(context['year'], context['league'])
         context['dataset'] = self.service.get_pythagoras_dataset(teams)
         return context
 
@@ -195,9 +199,9 @@ def _search(request, action):
         names = name.lower().split()
         if len(names) == 2:
             # 件数チェック
-            players = StatsService.get_player_by_first_name_last_name(names[0].capitalize(), names[1].capitalize())
+            players = MlbDB.get_player_by_first_name_last_name(names[0].capitalize(), names[1].capitalize())
         elif len(names) == 1:
-            players = StatsService.get_player_by_first_name(names[0].capitalize())
+            players = MlbDB.get_player_by_first_name(names[0].capitalize())
         else:
             raise MlbBaseballException()
 
@@ -285,7 +289,7 @@ def pythagoras_search(request):
     """
     service = StatsService(VIEW_ENCODE)
     context = service.get_base_context()
-    template_html = "%s/pythagoras.html" % (StatsService.SUB_DOMAIN)
+    template_html = "%s/pythagoras.html" % (StatsService.SUB_DOMAIN, )
 
     if request.method == 'POST':
         form = PytagorasForm(request.POST)
@@ -293,7 +297,7 @@ def pythagoras_search(request):
             year = form.cleaned_data['year']
             league = form.cleaned_data['league']
             context['year'], context['league'], context['leagues'] = year, league, LEAGUES
-            teams = StatsService.get_teams_by_yearid_lgid(context['year'], context['league'])
+            teams = MlbDB.get_teams_by_yearid_lgid(context['year'], context['league'])
             context['dataset'] = service.get_pythagoras_dataset(teams)
             context['search_action'] = 'pythagoras_search'
         return render_to_response(
