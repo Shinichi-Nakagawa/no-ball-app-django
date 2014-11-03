@@ -122,7 +122,8 @@ class TopView(BaseView):
 
     def get_context_data(self, **kwargs):
         context = super(TopView, self).get_context_data(**kwargs)
-        # TODO 何も出さない
+        context['year'], context['league'], context['leagues'] = CURRENT_SEASON_YEAR, LEAGUE_AL, LEAGUES
+        context['MENU_ENABLE'] = False
         return context
 
 
@@ -182,6 +183,7 @@ class PythagorasView(BaseView):
         context['year'], context['league'], context['leagues'] = CURRENT_SEASON_YEAR, LEAGUE_AL, LEAGUES
         teams = MlbDB.get_teams_by_yearid_lgid(context['year'], context['league'])
         context['dataset'] = self.service.get_pythagoras_dataset(teams)
+        context['MENU_ENABLE'] = False  # メニュー表示はしない
         return context
 
 
@@ -306,6 +308,7 @@ def pythagoras_search(request):
             teams = MlbDB.get_teams_by_yearid_lgid(context['year'], context['league'])
             context['dataset'] = service.get_pythagoras_dataset(teams)
             context['search_action'] = 'pythagoras_search'
+            context['MENU_ENABLE'] = False  # メニュー表示はしない
         return render_to_response(
             template_html, context, context_instance=RequestContext(request)
         )

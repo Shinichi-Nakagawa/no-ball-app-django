@@ -52,14 +52,6 @@ BASE Template.
         <div class="collapse navbar-collapse navbar-ex1-collapse">
           <ul class="nav navbar-nav side-nav">
           {% if MENU_ENABLE %}
-              {% comment %}
-            <li {% block navbar-stats %}{% endblock %}><a href="/{{ SUB_DOMAIN }}/stats/?{{ QUERY_KEY }}={{ query_name }}">
-                <i class="fa fa-bar-chart-o"></i> Stats</a>
-            </li>
-            <li {% block navbar-sabr %}{% endblock %}>
-                <a href="/{{ SUB_DOMAIN }}/sabr/?{{ QUERY_KEY }}={{ query_name }}"><i class="fa fa-laptop"></i> SABR</a>
-            </li>
-            {% endcomment %}
             <li {% block navbar-pytagoras %}{% endblock %}>
                 <a href="/{{ SUB_DOMAIN }}/pythagoras/"><i class="fa fa-laptop"></i> Pytagoras</a>
             </li>

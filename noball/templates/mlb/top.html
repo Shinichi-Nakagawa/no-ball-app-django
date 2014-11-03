@@ -18,17 +18,21 @@
 {% comment %}コンテンツ（動的）{% endcomment %}
 {% block content %}
     {% comment %}これから作る{% endcomment %}
+    <h2>Player's Search</h2>
     <div class="container">
       <div  class="row">
         <form role="search" method="post" action="/{{ SUB_DOMAIN }}/search/">
             {% include "mlb/base/search_form.html" %}
         </form>
       </div>
-      <div class="row">
-
-
+    </div>
+    <h2>Pytagoras</h2>
+    <div class="container">
+      <div  class="row">
+        <form role="search" method="post" action="/{{ SUB_DOMAIN }}/pythagoras_search/">
+            {% include "mlb/base/pythagoras_form.html" %}
+        </form>
       </div>
-
     </div>
 
 {% endblock %}
