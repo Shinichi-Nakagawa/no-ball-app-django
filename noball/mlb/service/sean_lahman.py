@@ -5,6 +5,7 @@ __author__ = 'Shinichi Nakagawa'
 
 from mlb.models import Master as Player
 from mlb.models import Battingtotal, Pitchingtotal, Salariestotal, Teams
+from mlb.models import Batting, Pitching
 
 
 class SeanLahmanDB(object):
@@ -44,7 +45,7 @@ class SeanLahmanDB(object):
     @classmethod
     def pitching_total(cls, database=DATABASE_READ_FOR):
         """
-        投手成績モデル
+        投手成績モデル(年度毎)
         :param database: using database(default: DATABASE_READ_FOR)
         :return: model
         """
@@ -53,11 +54,29 @@ class SeanLahmanDB(object):
     @classmethod
     def batting_total(cls, database=DATABASE_READ_FOR):
         """
-        打撃成績モデル
+        打撃成績モデル(年度毎)
         :param database: using database(default: DATABASE_READ_FOR)
         :return: model
         """
         return SeanLahmanDB._read_model(Battingtotal, database)
+
+    @classmethod
+    def get_pitching(cls, database=DATABASE_READ_FOR):
+        """
+        投手成績モデル(年度,チーム毎)
+        :param database: using database(default: DATABASE_READ_FOR)
+        :return: model
+        """
+        return SeanLahmanDB._read_model(Pitching, database)
+
+    @classmethod
+    def get_batting(cls, database=DATABASE_READ_FOR):
+        """
+        打撃成績モデル(年度,チーム毎)
+        :param database: using database(default: DATABASE_READ_FOR)
+        :return: model
+        """
+        return SeanLahmanDB._read_model(Batting, database)
 
     @classmethod
     def player(cls, database=DATABASE_READ_FOR):
@@ -90,6 +109,18 @@ class SeanLahmanDB(object):
         return model.filter(playerid=playerid).order_by('-yearid').all()[:limit]
 
     @classmethod
+    def get_model_filter_player_order_by_year_desc_stint_desc(cls, model, yearid, playerid, limit=1):
+        """
+        選手に紐づくモデルを所属の降順で取得
+        :param model: 対象モデル(Batting, Pitching, Salary, etc...)
+        :param yearid: 年度
+        :param playerid: 選手ID(PlayerのUNIQUE KEY)
+        :param limit: 取得件数
+        :return: model list
+        """
+        return model.filter(yearid=yearid).filter(playerid=playerid).order_by('-stint').all()[:limit]
+
+    @classmethod
     def count_by_player_id(cls, model, playerid):
         """
         選手IDでの検索件数
@@ -117,3 +148,18 @@ class SeanLahmanDB(object):
         :return: Player's List
         """
         return SeanLahmanDB.player().filter(namefirst=first_name)
+
+    @classmethod
+    def get_last_team(cls, model, yearid, playerid):
+        """
+        最終所属チーム
+        :param model: Django Model
+        :param yearid: 年度
+        :param playerid: 選手ID(PlayerのUNIQUE KEY)
+        :return: (str)team
+        """
+        player = SeanLahmanDB.get_model_filter_player_order_by_year_desc_stint_desc(model, yearid, playerid)
+        if len(player) == 1:
+            return player[0].teamid
+        else:
+            raise Exception('Last team Exception')

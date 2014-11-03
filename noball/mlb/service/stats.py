@@ -201,7 +201,7 @@ class Stats(object):
             so = pitching.so
             er = pitching.er
             ipo = pitching.ipouts
-            # teams.append(pitching.teamid)
+            teams.append(MlbDB.get_last_team(MlbDB.get_pitching(), year, pitching.playerid))
 
         # ipを計算
         ip = BaseballStats.ip(ipo)
@@ -231,7 +231,7 @@ class Stats(object):
             ab = batter.ab
             hr = batter.hr
             rbi = rbi + batter.rbi
-            # teams.append(batter.teamid)
+            teams.append(MlbDB.get_last_team(MlbDB.get_batting(), year, batter.playerid))
 
         _prof = self._get_base_profile(player, year, teams, salary)
         _prof['position'] = POSITION_BATTER.upper()
