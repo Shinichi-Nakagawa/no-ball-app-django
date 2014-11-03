@@ -11,11 +11,18 @@ from service.const import POSITION_PITCHER, POSITION_BATTER
 from service.stats import Stats as BaseballStats
 from noball.settings import APPLICATION_NAME
 
+from mlb.models import Master as Player
+from mlb.models import Battingtotal, Pitchingtotal, Salariestotal, Teams
+
 
 __author__ = 'Shinichi Nakagawa'
 
 
 class Stats(object):
+
+    # データベースを指定
+    DATABASE_READ_FOR = 'mlb'
+    DATABASE_WRITE_FOR = 'mlb'
 
     # サブドメイン名
     SUB_DOMAIN = 'mlb'
@@ -319,3 +326,58 @@ class Stats(object):
         r_power = r ** Stats.PYTHAGORIAN_POWER
         ra_power = ra ** Stats.PYTHAGORIAN_POWER
         return round(r_power / (r_power + ra_power), 3)
+
+    @classmethod
+    def teams(cls, database=DATABASE_READ_FOR):
+        """
+        球団モデル
+        :param database: using database(default: DATABASE_READ_FOR)
+        :return: model
+        """
+        return Stats._read_model(Teams, database)
+
+    @classmethod
+    def salaries_total(cls, database=DATABASE_READ_FOR):
+        """
+        年俸モデル
+        :param database: using database(default: DATABASE_READ_FOR)
+        :return: model
+        """
+        return Stats._read_model(Salariestotal, database)
+
+    @classmethod
+    def pitching_total(cls, database=DATABASE_READ_FOR):
+        """
+        投手成績モデル
+        :param database: using database(default: DATABASE_READ_FOR)
+        :return: model
+        """
+        return Stats._read_model(Pitchingtotal, database)
+
+    @classmethod
+    def batting_total(cls, database=DATABASE_READ_FOR):
+        """
+        打撃成績モデル
+        :param database: using database(default: DATABASE_READ_FOR)
+        :return: model
+        """
+        return Stats._read_model(Battingtotal, database)
+
+    @classmethod
+    def player(cls, database=DATABASE_READ_FOR):
+        """
+        選手モデル
+        :param database: using database(default: DATABASE_READ_FOR)
+        :return: model
+        """
+        return Stats._read_model(Player, database)
+
+    @classmethod
+    def _read_model(cls, model, database):
+        """
+        DB検索
+        :param model: Django Model
+        :param database: using database
+        :return: model
+        """
+        return model.objects.using(database)

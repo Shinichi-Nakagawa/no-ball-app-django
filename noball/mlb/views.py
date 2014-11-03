@@ -11,16 +11,9 @@ from noball.settings import VIEW_ENCODE
 from service.const import CURRENT_SEASON_YEAR, LEAGUES, POSITION_BATTER, POSITION_PITCHER, LEAGUE_AL
 from mlb.form import SearchForm, PytagorasForm
 from mlb.service.stats import Stats as StatsService
-from mlb.models import Teams, Salariestotal
-from mlb.models import Master as Player
-from mlb.models import Battingtotal
-from mlb.models import Pitchingtotal
 
 
 class BaseView(TemplateView):
-
-    # データベースを指定
-    DATABASE_READ_FOR = 'mlb'
 
     def get_context_data(self, **kwargs):
         '''
@@ -57,8 +50,7 @@ class PlayerView(BaseView):
         context.update(self.service.get_base_context())
         # 検索QUERYを保存
         context['query_name'] = name
-        if Player.objects.using(self.DATABASE_READ_FOR)\
-                .filter(namefirst=first).filter(namelast=last).count() == 1:
+        if StatsService.player().filter(namefirst=first).filter(namelast=last).count() == 1:
             # 全画面共通のContext(PlayerModelの中身)
             context['player'] = self._get_player(first, last)
             # 成績情報(PlayerStatsModelの中身)
@@ -87,26 +79,32 @@ class PlayerView(BaseView):
             pass
         else:
             # キャッシュに無かったらDBを検索
-            return Player.objects.using(self.DATABASE_READ_FOR)\
-                .filter(namefirst=first).filter(namelast=last).get()
+            return StatsService.player().filter(namefirst=first).filter(namelast=last).get()
 
     def _get_player_stats(self, playerID):
         # batting, pitching両方のスタッツを取って多い方を出す。
-        count_atbat = Battingtotal.objects.using(self.DATABASE_READ_FOR)\
-            .filter(playerid=playerID).count()
-        count_pitch = Pitchingtotal.objects.using(self.DATABASE_READ_FOR)\
-            .filter(playerid=playerID).count()
+        count_atbat = StatsService.batting_total().filter(playerid=playerID).count()
+        count_pitch = StatsService.pitching_total().filter(playerid=playerID).count()
 
         # 検索対象のモデルと戻り値
         if count_atbat > count_pitch:
             # Batter
-            model = self._get_model_filter_player_order_by_year_desc(Battingtotal, playerID)
+            model = self._get_model_filter_player_order_by_year_desc(
+                StatsService.batting_total(),
+                playerID
+            )
             pos = POSITION_BATTER
         else:
             # Pitcher
-            model = self._get_model_filter_player_order_by_year_desc(Pitchingtotal, playerID)
+            model = self._get_model_filter_player_order_by_year_desc(
+                StatsService.pitching_total(),
+                playerID
+            )
             pos = POSITION_PITCHER
-        salary = self._get_model_filter_player_order_by_year_desc(Salariestotal, playerID)
+        salary = self._get_model_filter_player_order_by_year_desc(
+            StatsService.salaries_total(),
+            playerID
+        )
 
         return model, pos, salary
 
@@ -114,8 +112,7 @@ class PlayerView(BaseView):
         """
         search model
         """
-        return model.objects.using(self.DATABASE_READ_FOR)\
-            .filter(playerid=player_id).order_by('-yearid').all()[:limit]
+        return model.filter(playerid=player_id).order_by('-yearid').all()[:limit]
 
 
 class MlbBaseballException(Exception):
@@ -185,7 +182,7 @@ class PythagorasView(BaseView):
     def get_context_data(self, **kwargs):
         context = super(PythagorasView, self).get_context_data(**kwargs)
         context['year'], context['league'], context['leagues'] = CURRENT_SEASON_YEAR, LEAGUE_AL, LEAGUES
-        teams = Teams.objects.using(self.DATABASE_READ_FOR)\
+        teams = StatsService.teams()\
             .filter(yearid=context['year']).filter(lgid=context['league']).order_by('divid', 'rank')
         context['dataset'] = self.service.get_pythagoras_dataset(teams)
         return context
@@ -205,11 +202,10 @@ def _search(request, action):
         names = name.lower().split()
         if len(names) == 2:
             # 件数チェック
-            players = Player.objects.using(BaseView.DATABASE_READ_FOR)\
+            players = StatsService.player()\
                 .filter(namefirst=names[0].capitalize()).filter(namelast=names[1].capitalize())
         elif len(names) == 1:
-            players = Player.objects.using(BaseView.DATABASE_READ_FOR)\
-                .filter(namefirst=names[0])
+            players = StatsService.player().filter(namefirst=names[0])
         else:
             raise MlbBaseballException()
 
@@ -290,7 +286,7 @@ def pythagoras_search(request):
             year = form.cleaned_data['year']
             league = form.cleaned_data['league']
             context['year'], context['league'], context['leagues'] = year, league, LEAGUES
-            teams = Teams.objects.using(BaseView.DATABASE_READ_FOR)\
+            teams = StatsService.teams()\
                 .filter(yearid=context['year']).filter(lgid=context['league']).order_by('divid', 'rank')
             context['dataset'] = service.get_pythagoras_dataset(teams)
             context['search_action'] = 'pythagoras_search'
