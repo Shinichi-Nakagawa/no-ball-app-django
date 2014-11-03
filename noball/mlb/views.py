@@ -229,6 +229,12 @@ def _search(request, action):
             # 候補選手を出してあげる
             for player in players:
                 context['values'].append(player)
+        else:
+            # 0件なら結果なし
+            # 1件以上なら「もしかして？XX」を出す（3,4件?）
+            like_players = MlbDB.search_player_by_name_like(name)
+            for like_player in like_players:
+                context['values'].append(like_player)
 
         if len(context['values']):
             context['result'] = True

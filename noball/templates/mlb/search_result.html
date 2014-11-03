@@ -32,8 +32,8 @@
     {% for row in values %}
         <tr>
             <td>
-                <a href="/{{ SUB_DOMAIN }}/{{ action }}/?{{ QUERY_KEY }}={{ row.name }}">
-                {{ row.name }}
+                <a href="/{{ SUB_DOMAIN }}/{{ action }}/?{{ QUERY_KEY }}={{ row.namefirst }} {{ row.namelast }}">
+                {{ row.namefirst }} {{ row.namelast }}
                 </a>
             </td>
         </tr>

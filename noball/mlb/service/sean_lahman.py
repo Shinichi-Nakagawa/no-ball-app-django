@@ -3,6 +3,7 @@
 
 __author__ = 'Shinichi Nakagawa'
 
+from django.db.models import Q
 from mlb.models import Master as Player
 from mlb.models import Battingtotal, Pitchingtotal, Salariestotal, Teams
 from mlb.models import Batting, Pitching
@@ -163,3 +164,14 @@ class SeanLahmanDB(object):
             return player[0].teamid
         else:
             raise Exception('Last team Exception')
+
+    @classmethod
+    def search_player_by_name_like(cls, name):
+        """
+        選手を名前であいまい検索
+        :param name: Player's name
+        :return: player list
+        """
+        return SeanLahmanDB.player().filter(
+            Q(namefirst__startswith=name) | Q(namelast__startswith=name)
+        ).all()
