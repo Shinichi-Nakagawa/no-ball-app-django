@@ -42,6 +42,9 @@ class Stats(object):
     # ピタゴラス勝率のべき乗
     PYTHAGORIAN_POWER = 1.8
 
+    # 戻り値の件数(固定)
+    STATS_LIMIT = 4
+
     def __init__(self, encode):
         locale.setlocale(locale.LC_NUMERIC, encode)
 
@@ -328,6 +331,16 @@ class Stats(object):
         return round(r_power / (r_power + ra_power), 3)
 
     @classmethod
+    def _read_model(cls, model, database):
+        """
+        DB検索
+        :param model: Django Model
+        :param database: using database
+        :return: model
+        """
+        return model.objects.using(database)
+
+    @classmethod
     def teams(cls, database=DATABASE_READ_FOR):
         """
         球団モデル
@@ -373,11 +386,64 @@ class Stats(object):
         return Stats._read_model(Player, database)
 
     @classmethod
-    def _read_model(cls, model, database):
+    def get_teams_by_yearid_lgid(cls, yearid, lgid):
         """
-        DB検索
-        :param model: Django Model
-        :param database: using database
-        :return: model
+        年度とLEAGUEを指定して球団リストを取得
+        :param yearid: 年度
+        :param lgid: LEAGUE ID
+        :return: Team List
         """
-        return model.objects.using(database)
+        return Stats.teams().filter(yearid=yearid).filter(lgid=lgid).order_by('divid', 'rank')
+
+    @classmethod
+    def get_model_filter_player_order_by_year_desc(cls, model, playerid, limit=STATS_LIMIT):
+        """
+        選手に紐づくモデルを年度の降順で取得
+        :param model: 対象モデル(Batting, Pitching, Salary, etc...)
+        :param playerid: 選手ID(PlayerのUNIQUE KEY)
+        :param limit: 取得件数
+        :return: model list
+        """
+        return model.filter(playerid=playerid).order_by('-yearid').all()[:limit]
+
+    @classmethod
+    def count_by_player_id(cls, model, playerid):
+        """
+        選手IDでの検索件数
+        :param model: 対象モデル(Batting, Pitching, Salary, etc...)
+        :param playerid: 選手ID(PlayerのUNIQUE KEY)
+        :return: count
+        """
+        return model.filter(playerid=playerid).count()
+
+    @classmethod
+    def exists_player(cls, firstname, lastname):
+        """
+        選手がいるかいないか
+        :param firstname: Player's First name
+        :param lastname: Player's Last name
+        :return: True(exists) or False(not exists)
+        """
+        if Stats.player().filter(namefirst=firstname).filter(namelast=lastname).count() == 1:
+            return True
+        else:
+            return False
+
+    @classmethod
+    def get_player_by_first_name_last_name(cls, first_name, last_name):
+        """
+        選手検索(姓名指定)
+        :param first_name: Player's First name
+        :param last_name: Player's Last name
+        :return: Player's List
+        """
+        return Stats.player().filter(namefirst=first_name).filter(namelast=last_name)
+
+    @classmethod
+    def get_player_by_first_name(cls, first_name):
+        """
+        選手検索(First Nameのみ)
+        :param first_name: Player's First name
+        :return: Player's List
+        """
+        return Stats.player().filter(namefirst=first_name)

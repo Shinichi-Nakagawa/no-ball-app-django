@@ -50,7 +50,7 @@ class PlayerView(BaseView):
         context.update(self.service.get_base_context())
         # 検索QUERYを保存
         context['query_name'] = name
-        if StatsService.player().filter(namefirst=first).filter(namelast=last).count() == 1:
+        if StatsService.exists_player(first, last):
             # 全画面共通のContext(PlayerModelの中身)
             context['player'] = self._get_player(first, last)
             # 成績情報(PlayerStatsModelの中身)
@@ -60,10 +60,10 @@ class PlayerView(BaseView):
         return context
 
     def get_response_value(self, context):
-        '''
+        """
         戻り値の編集
         野手or投手で呼び出し先を変える
-        '''
+        """
 
         if POSITION_BATTER == context['pos']:
             return self._get_batter_content(context['player'], context['stats'], context['Salaries'])
@@ -79,40 +79,34 @@ class PlayerView(BaseView):
             pass
         else:
             # キャッシュに無かったらDBを検索
-            return StatsService.player().filter(namefirst=first).filter(namelast=last).get()
+            return StatsService.get_player_by_first_name_last_name(first, last).get()
 
     def _get_player_stats(self, playerID):
         # batting, pitching両方のスタッツを取って多い方を出す。
-        count_atbat = StatsService.batting_total().filter(playerid=playerID).count()
-        count_pitch = StatsService.pitching_total().filter(playerid=playerID).count()
+        cnt_atbat = StatsService.count_by_player_id(StatsService.batting_total(), playerID)
+        cnt_pitch = StatsService.count_by_player_id(StatsService.pitching_total(), playerID)
 
         # 検索対象のモデルと戻り値
-        if count_atbat > count_pitch:
+        if cnt_atbat > cnt_pitch:
             # Batter
-            model = self._get_model_filter_player_order_by_year_desc(
+            model = StatsService.get_model_filter_player_order_by_year_desc(
                 StatsService.batting_total(),
                 playerID
             )
             pos = POSITION_BATTER
         else:
             # Pitcher
-            model = self._get_model_filter_player_order_by_year_desc(
+            model = StatsService.get_model_filter_player_order_by_year_desc(
                 StatsService.pitching_total(),
                 playerID
             )
             pos = POSITION_PITCHER
-        salary = self._get_model_filter_player_order_by_year_desc(
+        salary = StatsService.get_model_filter_player_order_by_year_desc(
             StatsService.salaries_total(),
             playerID
         )
 
         return model, pos, salary
-
-    def _get_model_filter_player_order_by_year_desc(self, model, player_id, limit=4):
-        """
-        search model
-        """
-        return model.filter(playerid=player_id).order_by('-yearid').all()[:limit]
 
 
 class MlbBaseballException(Exception):
@@ -129,7 +123,7 @@ class TopView(BaseView):
 
 
 class HomeView(PlayerView):
-    template_name = "%s/home.html" % (StatsService.SUB_DOMAIN)
+    template_name = "%s/home.html" % (StatsService.SUB_DOMAIN, )
 
     def get_context_data(self, **kwargs):
         context = super(HomeView, self).get_context_data(**kwargs)
@@ -137,29 +131,29 @@ class HomeView(PlayerView):
             context['values'] = self.get_response_value(context)
         return context
 
-    def _get_batter_content(self, player, player_stats, Salaries):
-        '''
+    def _get_batter_content(self, player, player_stats, salaries):
+        """
         Batter情報取得
         :param player:
         :param player_stats:
-        :param Salaries:
+        :param salaries:
         :return:
-        '''
-        return self.service.get_home_value_batter(player, player_stats, Salaries)
+        """
+        return self.service.get_home_value_batter(player, player_stats, salaries)
 
-    def _get_pitcher_content(self, player, player_stats, Salaries):
-        '''
+    def _get_pitcher_content(self, player, player_stats, salaries):
+        """
         Pitcher情報取得
         :param player:
         :param player_stats:
-        :param Salaries:
+        :param salaries:
         :return:
-        '''
-        return self.service.get_home_value_pitcher(player, player_stats, Salaries)
+        """
+        return self.service.get_home_value_pitcher(player, player_stats, salaries)
 
 
 class SabrView(PlayerView):
-    template_name = "%s/sabr.html" % (StatsService.SUB_DOMAIN)
+    template_name = "%s/sabr.html" % (StatsService.SUB_DOMAIN, )
 
     def get_context_data(self, **kwargs):
         context = super(SabrView, self).get_context_data(**kwargs)
@@ -167,23 +161,22 @@ class SabrView(PlayerView):
             context['data'] = self.get_response_value(context)
         return context
 
-    def _get_batter_content(self, player, player_stats, Salaries):
+    def _get_batter_content(self, player, player_stats, salaries):
         # Serviceを呼び出す
-        return self.service.get_sabr_value_batter(player, player_stats, Salaries)
+        return self.service.get_sabr_value_batter(player, player_stats, salaries)
 
-    def _get_pitcher_content(self, player, player_stats, Salaries):
+    def _get_pitcher_content(self, player, player_stats, salaries):
         # Serviceを呼び出す
-        return self.service.get_sabr_value_pitcher(player, player_stats, Salaries)
+        return self.service.get_sabr_value_pitcher(player, player_stats, salaries)
 
 
 class PythagorasView(BaseView):
-    template_name = "%s/pythagoras.html" % (StatsService.SUB_DOMAIN)
+    template_name = "%s/pythagoras.html" % (StatsService.SUB_DOMAIN, )
 
     def get_context_data(self, **kwargs):
         context = super(PythagorasView, self).get_context_data(**kwargs)
         context['year'], context['league'], context['leagues'] = CURRENT_SEASON_YEAR, LEAGUE_AL, LEAGUES
-        teams = StatsService.teams()\
-            .filter(yearid=context['year']).filter(lgid=context['league']).order_by('divid', 'rank')
+        teams = StatsService.get_teams_by_yearid_lgid(context['year'], context['league'])
         context['dataset'] = self.service.get_pythagoras_dataset(teams)
         return context
 
@@ -193,7 +186,7 @@ def _search(request, action):
     検索
     :param request: Http Request objects
     :param action: 遷移先ページ
-    :return:
+    :return: response
     '''
     service = StatsService(VIEW_ENCODE)
     form = SearchForm(request.POST)
@@ -202,10 +195,9 @@ def _search(request, action):
         names = name.lower().split()
         if len(names) == 2:
             # 件数チェック
-            players = StatsService.player()\
-                .filter(namefirst=names[0].capitalize()).filter(namelast=names[1].capitalize())
+            players = StatsService.get_player_by_first_name_last_name(names[0].capitalize(), names[1].capitalize())
         elif len(names) == 1:
-            players = StatsService.player().filter(namefirst=names[0])
+            players = StatsService.get_player_by_first_name(names[0].capitalize())
         else:
             raise MlbBaseballException()
 
@@ -256,16 +248,31 @@ def _search(request, action):
 
 
 def search(request):
+    """
+    検索(選手)
+    :param request: http request
+    :return: response
+    """
     if request.method == 'POST':
         return _search(request, 'player')
 
 
 def stats_search(request):
+    """
+    検索(Stats)
+    :param request: http request
+    :return: response
+    """
     if request.method == 'POST':
         return _search(request, 'stats')
 
 
 def sabr_search(request):
+    """
+    検索(SABR Metrics)
+    :param request: http request
+    :return: response
+    """
     if request.method == 'POST':
         return _search(request, 'sabr')
 
@@ -273,8 +280,8 @@ def sabr_search(request):
 def pythagoras_search(request):
     """
     ピタゴラス勝率(Form検索)
-    :param request: request object
-    :return: html
+    :param request: http request
+    :return: response
     """
     service = StatsService(VIEW_ENCODE)
     context = service.get_base_context()
@@ -286,8 +293,7 @@ def pythagoras_search(request):
             year = form.cleaned_data['year']
             league = form.cleaned_data['league']
             context['year'], context['league'], context['leagues'] = year, league, LEAGUES
-            teams = StatsService.teams()\
-                .filter(yearid=context['year']).filter(lgid=context['league']).order_by('divid', 'rank')
+            teams = StatsService.get_teams_by_yearid_lgid(context['year'], context['league'])
             context['dataset'] = service.get_pythagoras_dataset(teams)
             context['search_action'] = 'pythagoras_search'
         return render_to_response(
