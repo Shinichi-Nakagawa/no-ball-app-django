@@ -106,7 +106,9 @@ https://github.com/Shinichi-Nakagawa/no-ball-app-django/blob/master/noball/nobal
 
 「DATABASES」で検索、mlb データベースのパスワードを、appユーザーのパスワードに書き換えてください
 
-``` python
+具体的には、**'PASSWORD': 'adam_dunn'** の「adam_dunn」をご自身のパスワードに変更してください
+
+``` python setting.py
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
@@ -116,7 +118,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
         'NAME': 'sean_lahman',                      # Or path to database file if using sqlite3.
         'USER': 'app',
-        __'PASSWORD': 'adam_dunn',__　←ココを書き換える
+        'PASSWORD': 'adam_dunn',　←ココを書き換える
         'HOST': '192.168.33.10',                      # Empty for localhost through domain sockets or '127.0.0.1' for localhost through TCP.
         'PORT': '3306',                      # Set to empty string for default.
     }
