@@ -1,0 +1,63 @@
+{% comment %}
+成績
+Graphデータ（投手）
+{% endcomment %}
+<script>
+
+{% comment %}
+防御率,WHIP
+{% endcomment %}
+Morris.Line({
+  element: 'morris-era',
+  data: [
+      {% for row in data.era_list %}
+    	{ year: '{{ row.year }}', era: {{ row.era }}, whip: {{ row.whip }}},
+      {% endfor %}
+  ],
+  xkey: 'year',
+  ykeys: ['era', 'whip'],
+  labels: ['ERA', 'WHIP'],
+  smooth: false,
+  hideHover: 'auto',
+  ymax:5.0,
+  ymin:0
+});
+
+{% comment %}
+勝利,敗北,セーブ
+{% endcomment %}
+Morris.Bar ({
+  element: 'morris-w',
+  data: [
+      {% for row in data.win_list %}
+    	{ year: '{{ row.year }}', win: {{ row.win }}, lose: {{ row.lose }}, sv: {{ row.sv }}},
+      {% endfor %}
+  ],
+  xkey: 'year',
+  ykeys: ['win', 'lose', 'sv'],
+  labels: ['W', 'L', 'SV'],
+  stacked: true,
+  hideHover: 'auto',
+  ymax:50,
+  ymin:0
+});
+
+{% comment %}
+イニング,奪三振,与四球
+{% endcomment %}
+Morris.Line({
+  element: 'morris-ip',
+  data: [
+      {% for row in data.ip_list %}
+    	{ year: '{{ row.year }}', ip: {{ row.ip }}, so: {{ row.so }}, bb: {{ row.bb }}},
+      {% endfor %}
+  ],
+  xkey: 'year',
+  ykeys: ['ip', 'so', 'bb'],
+  labels: ['IP', 'SO', 'BB'],
+  smooth: false,
+  hideHover: 'auto',
+  ymax:300.0,
+  ymin:0
+});
+</script>

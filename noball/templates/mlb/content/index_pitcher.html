@@ -1,0 +1,151 @@
+{% comment %}
+ホーム画面＆選手基本情報
+pitcher用template
+{% endcomment %}
+<div class="row">
+  <div class="col-lg-4">
+    <div class="panel panel-info">
+      <div class="panel-heading">
+<div class="row">
+  <div class="col-xs-6">
+    <i class="fa fa-group fa-5x"></i>
+  </div>
+  <div class="col-xs-6 text-right">
+    <p class="announcement-heading">{{ values.team }}</p>
+    <p class="announcement-text">Last Season</p>
+  </div>
+</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="panel panel-success">
+      <div class="panel-heading">
+<div class="row">
+  <div class="col-xs-6">
+    <i class="fa fa-calendar fa-5x"></i>
+  </div>
+  <div class="col-xs-6 text-right">
+    <p class="announcement-heading">{{ values.age }}</p>
+    <p class="announcement-text">{{ values.birthday }}</p>
+  </div>
+</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="panel panel-danger">
+      <div class="panel-heading">
+<div class="row">
+  <div class="col-xs-6">
+    <i class="fa fa-flag-o fa-5x"></i>
+  </div>
+  <div class="col-xs-6 text-right">
+    <p class="announcement-heading">{{ values.country }}</p>
+    <p class="announcement-text">City:{{ values.city }}</p>
+  </div>
+</div>
+      </div>
+    </div>
+  </div>
+</div><!-- /.row -->
+
+<div class="row">
+  <div class="col-lg-4">
+    <div class="panel panel-warning">
+      <div class="panel-heading">
+<div class="row">
+  <div class="col-xs-6">
+    <i class="fa fa-money fa-5x"></i>
+  </div>
+  <div class="col-xs-6 text-right">
+    <p class="announcement-heading">{{ values.salary }}</p>
+    <p class="announcement-text">Salary({{ values.year }})</p>
+  </div>
+</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+<div class="row">
+  <div class="col-xs-6">
+    <i class="fa fa-user fa-5x"></i>
+  </div>
+  <div class="col-xs-6 text-right">
+    <p class="announcement-heading">{{ values.position }}</p>
+    {% if values.sub_position %}
+      <p class="announcement-text">other: {{ values.sub_position }}</p>
+    {% else %}
+      <p class="announcement-text">&nbsp</p>
+    {% endif %}
+  </div>
+</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+<div class="row">
+  <div class="col-xs-6">
+    <i class="fa fa-edit fa-5x"></i>
+  </div>
+  <div class="col-xs-6 text-right">
+    <p class="announcement-heading">{{ values.bats }}/{{ values.throws }}</p>
+    <p class="announcement-text">Bats/Throws</p>
+  </div>
+</div>
+      </div>
+    </div>
+  </div>
+</div><!-- /.row -->
+
+<div class="row">
+  <div class="col-lg-4">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+<div class="row">
+  <div class="col-xs-6">
+    <p class="announcement-heading">ERA</p>
+  </div>
+  <div class="col-xs-6 text-right">
+    <p class="announcement-heading">{{ values.era }}</p>
+    <p class="announcement-text">{{ values.year }}</p>
+  </div>
+</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+<div class="row">
+  <div class="col-xs-6">
+    <p class="announcement-heading">W-L</p>
+  </div>
+  <div class="col-xs-6 text-right">
+    <p class="announcement-heading">{{ values.win }}-{{ values.lose }}</p>
+    <p class="announcement-text">{{ values.year }}</p>
+  </div>
+</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="panel panel-default">
+      <div class="panel-heading">
+<div class="row">
+  <div class="col-xs-6">
+    <p class="announcement-heading">SO</p>
+  </div>
+  <div class="col-xs-6 text-right">
+    <p class="announcement-heading">{{ values.so }}</p>
+    <p class="announcement-text">{{ values.year }}</p>
+  </div>
+</div>
+      </div>
+    </div>
+  </div>
+</div><!-- /.row -->

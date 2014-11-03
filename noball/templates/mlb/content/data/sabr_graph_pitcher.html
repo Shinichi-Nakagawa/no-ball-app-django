@@ -1,0 +1,64 @@
+{% comment %}
+セイバーメトリクス
+Graphデータ（投手）
+{% endcomment %}
+<script>
+
+{% comment %}
+WAR
+{% endcomment %}
+Morris.Line({
+  element: 'morris-whip',
+  data: [
+      {% for row in data.whip_list %}
+    	{ year: '{{ row.year }}', whip: {{ row.whip }}},
+      {% endfor %}
+  ],
+  xkey: 'year',
+  ykeys: ['whip'],
+  labels: ['WHIP'],
+  smooth: false,
+  hideHover: 'auto',
+  ymax:3,
+  ymin:0
+});
+
+{% comment %}
+HR/9, BB/9, SO/9
+{% endcomment %}
+Morris.Line({
+  element: 'morris-9',
+  data: [
+      {% for row in data.hr9_list %}
+    	{ year: '{{ row.year }}', hr9: {{ row.hr9 }}, bb9: {{ row.bb9 }}, so9: {{ row.so9 }}},
+      {% endfor %}
+  ],
+  xkey: 'year',
+  ykeys: ['hr9', 'bb9', 'so9'],
+  labels: ['HR/9', 'BB/9', 'SO/9'],
+  smooth: false,
+  hideHover: 'auto',
+  ymax:10,
+  ymin:0
+});
+
+{% comment %}
+Adam Dunn
+{% endcomment %}
+Morris.Line({
+  element: 'morris-dunn',
+  data: [
+      {% for row in data.dunn_list %}
+    	{ year: '{{ row.year }}', dunn: {{ row.dunn }}},
+      {% endfor %}
+  ],
+  xkey: 'year',
+  ykeys: ['dunn'],
+  labels: ['Adam Dunn'],
+  smooth: false,
+  hideHover: 'auto',
+  ymax:100,
+  ymin:0,
+  yLabelFormat: function (y) { return y.toString() + '%'; }
+});
+</script>

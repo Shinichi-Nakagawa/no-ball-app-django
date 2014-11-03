@@ -1,0 +1,41 @@
+{% extends "mlb/base/base.html" %}
+{% comment %}
+ホーム画面＆選手基本情報
+{% endcomment %}
+{% comment %}タイトル（固定）{% endcomment %}
+{% block title %}Profile - {{ APPLICATION_NAME }}{% endblock %}
+{% comment %}検索Action名 {% endcomment %}
+{% block search-action %}/{{ SUB_DOMAIN }}/search{% endblock %}
+{% comment %}ナビゲーターのStatus（固定）{% endcomment %}
+{% block navbar-home %}class="active"{% endblock %}
+{% comment %}パンくず（動的）{% endcomment %}
+{% block breadcrumb %}
+<ol class="breadcrumb">
+    <li><a href="/{{ SUB_DOMAIN }}/home/?{{ QUERY_KEY }}={{ query_name }}"><i class="fa fa-home"></i>{{ player.name }}</a></li>
+    <li class="active"><i class="fa fa-user">{{ player.display_name }}</i> </li>
+</ol>
+{% endblock %}
+{% comment %}検索フォーム{% endcomment %}
+{% block search_form %}
+    <form role="search" method="post" action="/{{ SUB_DOMAIN }}/search/">
+    {% include "mlb/base/search_form.html" %}
+    </form>
+{% endblock %}
+{% comment %}選手名（動的）{% endcomment %}
+{% block player_name %}<a href="{{ player.url }}" target="_blank">{{ player.display_name }}</a>{%  endblock %}
+{% comment %}コンテンツ（動的）{% endcomment %}
+{% block content %}
+    {% ifequal pos PLAYER_BATTER %}
+        {% include "mlb/content/index_batter.html" %}
+    {% endifequal %}
+    {% ifequal pos PLAYER_PITCHER %}
+        {% include "mlb/content/index_pitcher.html" %}
+    {% endifequal %}
+{% endblock %}
+{% comment %}
+コンテンツデータ（動的）
+
+今のところナシ、将来はアリ（多分）
+{% endcomment %}
+{% block data_content %}
+{% endblock %}

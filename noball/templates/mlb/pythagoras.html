@@ -1,0 +1,134 @@
+{% extends "mlb/base/base.html" %}
+{% comment %}
+ピタゴラス勝率
+{% endcomment %}
+{% comment %}タイトル（固定）{% endcomment %}
+{% block title %}{{ APPLICATION_NAME }} - Pythagorean expectation{% endblock %}
+{% comment %}ヘッダースクリプト{% endcomment %}
+{% block header_script %}
+		<script type="text/javascript">
+$(function () {
+    $('#container').highcharts({
+        chart: {
+            type: 'scatter',
+            zoomType: 'xy'
+        },
+        title: {
+            text: 'ピタゴラス勝率と実際の勝率の相関図(MLB, {{ year }}シーズン({{ league }}))'
+        },
+        subtitle: {
+            text: 'Source: Sean lahman database 2013'
+        },
+        xAxis: {
+            title: {
+                enabled: true,
+                text: '実際の勝利数'
+            },
+            startOnTick: true,
+            endOnTick: true,
+            showLastLabel: true
+        },
+        yAxis: {
+            title: {
+                text: 'ピタゴラス勝率から算出した勝利数'
+            }
+        },
+        legend: {
+            layout: 'vertical',
+            align: 'left',
+            verticalAlign: 'top',
+            x: 100,
+            y: 70,
+            floating: true,
+            backgroundColor: (Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF',
+            borderWidth: 1
+        },
+        plotOptions: {
+            scatter: {
+                marker: {
+                    radius: 5,
+                    states: {
+                        hover: {
+                            enabled: true,
+                            lineColor: 'rgb(100,100,100)'
+                        }
+                    }
+                },
+                states: {
+                    hover: {
+                        marker: {
+                            enabled: false
+                        }
+                    }
+                },
+                tooltip: {
+                    headerFormat: '<b>{point.key}</b><br>',
+                    pointFormat: '実際：{point.x}勝, 予測：{point.y}勝'
+                }
+            }
+        },
+        series: [{
+            name: 'チーム(地区順位) ※E:東地区,C:中地区,W:西地区',
+            color: 'rgba(223, 83, 83, .5)',
+            dataLabels: {
+                enabled: true,
+                x:20,
+                formatter:function() {
+                    return this.point.team;
+                },
+                style:{color:"black"}
+            },
+            data: [
+                {% for d in dataset %}
+                    {
+                        "x": {{ d.w }},
+                        "y": {{ d.pyt_p_w }},
+                        "name": '{{ d.name }}({{ d.div }}, {{ d.rank }})',
+                        "team": '{{ d.team }}'
+                    },
+                {% endfor %}
+            ]
+
+        }
+        ]
+    });
+});
+
+
+		</script>
+{% endblock %}
+{% comment %}コンテンツ用スクリプト{% endcomment %}
+{% block body_script %}
+    <script src="{{ STATIC_URL }}js/highcharts.js"></script>
+    <script src="{{ STATIC_URL }}js/modules/exporting.js"></script>
+{% endblock %}
+{% comment %}検索Action名 {% endcomment %}
+{% block search-action %}search{% endblock %}
+{% comment %}ナビゲーターのStatus（固定）{% endcomment %}
+{% block navbar-pytagoras %}class="active"{% endblock %}
+{% comment %}パンくず（動的）{% endcomment %}
+{% block breadcrumb %}
+{% endblock %}
+{% comment %}ページ名（静的）{% endcomment %}
+{% block page_title %}{% endblock %}
+{% comment %}検索フォーム{% endcomment %}
+{% block search_form %}
+    <form role="search" method="post" action="/{{ SUB_DOMAIN }}/pythagoras_search/">
+    {% include "mlb/base/pythagoras_form.html" %}
+    </form>
+{% endblock %}
+{% comment %}サービス名{% endcomment %}
+{% block player_name %}{%  endblock %}
+{% comment %}コンテンツ（動的）{% endcomment %}
+{% block content %}
+    {% comment %}これから作る{% endcomment %}
+<div id="container" style="margin: 0 auto"></div>
+
+{% endblock %}
+{% comment %}
+コンテンツデータ（動的）
+
+今のところナシ、将来はアリ（多分）
+{% endcomment %}
+{% block data_content %}
+{% endblock %}
