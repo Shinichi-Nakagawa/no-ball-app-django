@@ -272,8 +272,7 @@ class Stats(object):
         """
         sal = 0
         if len(salary) > 0:
-            for s in salary:
-                sal = sal + s.salary
+            sal = salary[0].salary
         return Stats._get_salary(sal)
 
     @classmethod
