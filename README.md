@@ -1,7 +1,7 @@
 no-ball-app-django ~ のぼーる（野球）Djangoアプリケーション
 =================
 
-Lahman’s Baseball Database( http://www.seanlahman.com/baseball-archive/statistics/ )をMySQLで使うプロジェクトです。
+Lahman’s Baseball Database( http://www.seanlahman.com/baseball-archive/statistics/ )をDjango(Python)で扱おう！というプロジェクトです
 
 ## Description
 
@@ -108,7 +108,7 @@ https://github.com/Shinichi-Nakagawa/no-ball-app-django/blob/master/noball/nobal
 
 具体的には、**'PASSWORD': 'adam_dunn'** の「adam_dunn」をご自身のパスワードに変更してください
 
-``` python setting.py
+``` python
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
