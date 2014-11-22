@@ -37,7 +37,7 @@ class Stats(object):
         :param ip: inning pitched
         :return: (float) whip
         """
-        return round((bb + h) / ip, 2)
+        return round((bb + h) / ip, 3)
 
     @classmethod
     def h9(cls, h, ip):
@@ -150,14 +150,19 @@ class Stats(object):
         return round((h + bb + hbp) / (ab + bb + hbp + sf), 3)
 
     @classmethod
-    def ops(cls, obp, slg):
+    def ops(cls, h, bb, hbp, ab, sf, tb):
         """
         On the base + slugging
-        :param obp: on the base
-        :param slg: slugging
+        :param h: hits
+        :param bb: base on ball
+        :param hbp: hit by pitch
+        :param ab: at bat
+        :param sf: sacrifice fly
+        :param tb: total bases
         :return: (float) ops
         """
-        return obp + slg
+        # OBPとSLGを計算してから足して四捨五入
+        return round(((tb / ab) + (h + bb + hbp) / (ab + bb + hbp + sf)), 3)
 
     @classmethod
     def babip(cls, h, hr, ab, so, sf):
