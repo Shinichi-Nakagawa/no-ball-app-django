@@ -56,8 +56,8 @@ class Appearances(models.Model):
 
 
 class Awardsmanagers(models.Model):
-    playerid = models.CharField(db_column='playerID', max_length=9)  # Field name made lowercase.
-    awardid = models.CharField(db_column='awardID', max_length=25)  # Field name made lowercase.
+    playerid = models.CharField(db_column='playerID', max_length=10)  # Field name made lowercase.
+    awardid = models.CharField(db_column='awardID', max_length=75)  # Field name made lowercase.
     yearid = models.IntegerField(db_column='yearID')  # Field name made lowercase.
     lgid = models.CharField(db_column='lgID', max_length=2)  # Field name made lowercase.
     tie = models.CharField(max_length=1, blank=True)
@@ -85,7 +85,7 @@ class Awardssharemanagers(models.Model):
     awardid = models.CharField(db_column='awardID', max_length=25)  # Field name made lowercase.
     yearid = models.IntegerField(db_column='yearID')  # Field name made lowercase.
     lgid = models.CharField(db_column='lgID', max_length=2)  # Field name made lowercase.
-    playerid = models.CharField(db_column='playerID', max_length=9)  # Field name made lowercase.
+    playerid = models.CharField(db_column='playerID', max_length=10)  # Field name made lowercase.
     pointswon = models.IntegerField(db_column='pointsWon', blank=True, null=True)  # Field name made lowercase.
     pointsmax = models.IntegerField(db_column='pointsMax', blank=True, null=True)  # Field name made lowercase.
     votesfirst = models.IntegerField(db_column='votesFirst', blank=True, null=True)  # Field name made lowercase.
@@ -197,6 +197,16 @@ class Battingtotal(models.Model):
         db_table = 'BattingTotal'
 
 
+class Collegeplaying(models.Model):
+    playerid = models.CharField(db_column='playerID', max_length=9)  # Field name made lowercase.
+    schoolid = models.CharField(db_column='schoolID', max_length=15)  # Field name made lowercase.
+    yearid = models.IntegerField(db_column='yearID')  # Field name made lowercase.
+
+    class Meta:
+        managed = False
+        db_table = 'CollegePlaying'
+
+
 class Fielding(models.Model):
     playerid = models.CharField(db_column='playerID', max_length=9)  # Field name made lowercase.
     yearid = models.IntegerField(db_column='yearID')  # Field name made lowercase.
@@ -260,7 +270,7 @@ class Fieldingpost(models.Model):
 
 
 class Halloffame(models.Model):
-    playerid = models.CharField(db_column='playerID', max_length=9)  # Field name made lowercase.
+    playerid = models.CharField(db_column='playerID', max_length=10)  # Field name made lowercase.
     yearid = models.IntegerField()
     votedby = models.CharField(db_column='votedBy', max_length=64)  # Field name made lowercase.
     ballots = models.IntegerField(blank=True, null=True)
@@ -268,7 +278,7 @@ class Halloffame(models.Model):
     votes = models.IntegerField(blank=True, null=True)
     inducted = models.CharField(max_length=1, blank=True)
     category = models.CharField(max_length=20, blank=True)
-    needed_note = models.CharField(max_length=20, blank=True)
+    needed_note = models.CharField(max_length=25, blank=True)
 
     class Meta:
         managed = False
@@ -276,7 +286,7 @@ class Halloffame(models.Model):
 
 
 class Managers(models.Model):
-    playerid = models.CharField(db_column='playerID', max_length=9, blank=True)  # Field name made lowercase.
+    playerid = models.CharField(db_column='playerID', max_length=10, blank=True)  # Field name made lowercase.
     yearid = models.IntegerField(db_column='yearID')  # Field name made lowercase.
     teamid = models.CharField(db_column='teamID', max_length=3)  # Field name made lowercase.
     lgid = models.CharField(db_column='lgID', max_length=2, blank=True)  # Field name made lowercase.
@@ -293,7 +303,7 @@ class Managers(models.Model):
 
 
 class Managershalf(models.Model):
-    playerid = models.CharField(db_column='playerID', max_length=9)  # Field name made lowercase.
+    playerid = models.CharField(db_column='playerID', max_length=10)  # Field name made lowercase.
     yearid = models.IntegerField(db_column='yearID')  # Field name made lowercase.
     teamid = models.CharField(db_column='teamID', max_length=3)  # Field name made lowercase.
     lgid = models.CharField(db_column='lgID', max_length=2, blank=True)  # Field name made lowercase.
@@ -310,8 +320,7 @@ class Managershalf(models.Model):
 
 
 class Master(models.Model):
-    playerid = models.CharField(db_column='playerID', primary_key=True, max_length=9)  # Field name made lowercase.
-    hofid = models.CharField(db_column='hofID', max_length=10, blank=True)  # Field name made lowercase.
+    playerid = models.CharField(db_column='playerID', max_length=10, primary_key=True, null=False)  # Field name made lowercase.
     birthyear = models.IntegerField(db_column='birthYear', blank=True, null=True)  # Field name made lowercase.
     birthmonth = models.IntegerField(db_column='birthMonth', blank=True, null=True)  # Field name made lowercase.
     birthday = models.IntegerField(db_column='birthDay', blank=True, null=True)  # Field name made lowercase.
@@ -326,20 +335,14 @@ class Master(models.Model):
     deathcity = models.CharField(db_column='deathCity', max_length=50, blank=True)  # Field name made lowercase.
     namefirst = models.CharField(db_column='nameFirst', max_length=50, blank=True)  # Field name made lowercase.
     namelast = models.CharField(db_column='nameLast', max_length=50, blank=True)  # Field name made lowercase.
-    namenote = models.CharField(db_column='nameNote', max_length=255, blank=True)  # Field name made lowercase.
     namegiven = models.CharField(db_column='nameGiven', max_length=255, blank=True)  # Field name made lowercase.
-    namenick = models.CharField(db_column='nameNick', max_length=255, blank=True)  # Field name made lowercase.
     weight = models.IntegerField(blank=True, null=True)
     height = models.FloatField(blank=True, null=True)
     bats = models.CharField(max_length=1, blank=True)
     throws = models.CharField(max_length=1, blank=True)
-    debut = models.CharField(max_length=10, blank=True)
-    finalgame = models.CharField(db_column='finalGame', max_length=10, blank=True)  # Field name made lowercase.
-    college = models.CharField(max_length=50, blank=True)
-    lahman40id = models.CharField(db_column='lahman40ID', max_length=9, blank=True)  # Field name made lowercase.
-    lahman45id = models.CharField(db_column='lahman45ID', max_length=9, blank=True)  # Field name made lowercase.
+    debut = models.DateTimeField(blank=True, null=True)
+    finalgame = models.DateTimeField(db_column='finalGame', blank=True, null=True)  # Field name made lowercase.
     retroid = models.CharField(db_column='retroID', max_length=9, blank=True)  # Field name made lowercase.
-    holtzid = models.CharField(db_column='holtzID', max_length=9, blank=True)  # Field name made lowercase.
     bbrefid = models.CharField(db_column='bbrefID', max_length=9, blank=True)  # Field name made lowercase.
 
     class Meta:
@@ -477,25 +480,14 @@ class Salariestotal(models.Model):
 
 class Schools(models.Model):
     schoolid = models.CharField(db_column='schoolID', primary_key=True, max_length=15)  # Field name made lowercase.
-    schoolname = models.CharField(db_column='schoolName', max_length=255, blank=True)  # Field name made lowercase.
-    schoolcity = models.CharField(db_column='schoolCity', max_length=55, blank=True)  # Field name made lowercase.
-    schoolstate = models.CharField(db_column='schoolState', max_length=55, blank=True)  # Field name made lowercase.
-    schoolnick = models.CharField(db_column='schoolNick', max_length=55, blank=True)  # Field name made lowercase.
+    name_full = models.CharField(max_length=255, blank=True)
+    city = models.CharField(max_length=55, blank=True)
+    state = models.CharField(max_length=55, blank=True)
+    country = models.CharField(max_length=55, blank=True)
 
     class Meta:
         managed = False
         db_table = 'Schools'
-
-
-class Schoolsplayers(models.Model):
-    playerid = models.CharField(db_column='playerID', max_length=9)  # Field name made lowercase.
-    schoolid = models.CharField(db_column='schoolID', max_length=15)  # Field name made lowercase.
-    yearmin = models.IntegerField(db_column='yearMin', blank=True, null=True)  # Field name made lowercase.
-    yearmax = models.IntegerField(db_column='yearMax', blank=True, null=True)  # Field name made lowercase.
-
-    class Meta:
-        managed = False
-        db_table = 'SchoolsPlayers'
 
 
 class Seriespost(models.Model):
