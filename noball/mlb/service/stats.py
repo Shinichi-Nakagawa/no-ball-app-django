@@ -40,7 +40,8 @@ class Stats(object):
     STATS_LIMIT = 4
 
     def __init__(self, encode):
-        locale.setlocale(locale.LC_NUMERIC, encode)
+        pass
+        # locale.setlocale(locale.LC_NUMERIC, encode)
 
     def get_base_context(self):
         """

@@ -27,10 +27,9 @@ DEBUG = True
 
 TEMPLATE_DEBUG = True
 
-VIEW_ENCODE='en_US'
+VIEW_ENCODE='UTF-8'
 ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'localhost',
+    '*',
 ]
 
 
