@@ -1,10 +1,8 @@
-from django.conf.urls import patterns, include, url
+from django.conf.urls import include, url
+from django.conf.urls.static import static
+from noball.settings import STATIC_ROOT, STATIC_URL
+from mlb import urls
 
-from noball.settings import STATIC_ROOT
-
-urlpatterns = patterns('',
-    url(r'^static/(?P<path>.*)$', 'django.views.static.serve'
-    ,{'document_root': STATIC_ROOT}),
-    url(r'^mlb/', include('mlb.urls')),
-)
-
+urlpatterns = [
+                  url(r'^mlb/', include(urls)),
+              ] + static(STATIC_URL, document_root=STATIC_ROOT)

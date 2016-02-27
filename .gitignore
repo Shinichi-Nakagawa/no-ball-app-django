@@ -53,8 +53,9 @@ docs/_build/
 # PyBuilder
 target/
 
-# IntelliJ IDEA
-.idea/
+# Static file(Debug)
+
+noball/deploy/
 
 # Django DB
 noball/noball.db
