@@ -27,10 +27,9 @@ DEBUG = True
 
 TEMPLATE_DEBUG = True
 
-VIEW_ENCODE='en_US'
+VIEW_ENCODE='UTF-8'
 ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'localhost',
+    '*',
 ]
 
 
@@ -41,6 +40,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.auth',
     'mlb',
 )
 
