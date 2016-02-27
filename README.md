@@ -37,22 +37,22 @@ http://youtu.be/7NS1CwzlFS8?list=UUxNoKygeZIE1AwZ_NdUCkhQ
 
 プロジェクトをCloneする前にご準備願います。
 
- * Python 3.x ※3.4を推奨 
+ * Python 3.x ※3.4以上を推奨(3.4.3/3.5.1で動作確認住み)
  * pip https://pypi.python.org/pypi/pip
 
  Pythonおよびpipをインストール後、同梱されているrequirements.txtを使いライブラリのインストールを行ってください。
 
-> pip install -r requirements.txt
+    $ pip install -r requirements.txt
 
 ## Usage
 
 手っ取り早く動かしたい方は、Djangoのrunserverを用いると良いでしょう。
 
-> python manage.py runserver
+    $ python manage.py runserver
 
 アプリケーションが起動したら、以下のURLを叩いてください
 
-> http://localhost:8000/mlb
+    $ http://localhost:8000/mlb
 
 Top画面が開き、選手およびピタゴラス勝率の検索フォームが表示されます。
 
@@ -82,17 +82,17 @@ https://github.com/Shinichi-Nakagawa/no-ball-db-server
 
 構築が完了したら、
 
-> vagrant up
+    $ vagrant up
 
 でサーバーを起動することを忘れずに！
 
 #### クローンする先のディレクトリに移動
 
-> cd /Users/Billy_Beane/Documents
+    $ cd /Users/Billy_Beane/Documents
 
 #### プロジェクトをcloneする
 
-> git clone git@github.com:Shinichi-Nakagawa/no-ball-app-django.git
+    $ git clone git@github.com:Shinichi-Nakagawa/no-ball-app-django.git
 
 #### setting.pyの内容を変更
 
@@ -127,9 +127,27 @@ DATABASES = {
 
 これで、
 
-> python manage.py runserver
+    $ python manage.py runserver
 
 上記コマンドで無事起動したらアプリケーションが使えるはずです！
+
+## Docker
+
+dockerからの起動も可能です。
+
+    $ docker-compose up -d  # デーモンmodeで起動（buildもやってくれます）
+    
+Python 3.5.1のイメージを元にDjangoアプリケーションのコンテナを起動します。
+
+アクセスは、
+
+    http://{Docker HostのIPアドレス}:8000/mlb
+    
+でイケます。
+
+なお停止は以下のコマンドとなります。
+
+    $ docker-compose stop
 
 ## License
 
